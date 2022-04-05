@@ -12,6 +12,7 @@ exports.sio = (server) => {
 exports.connection = (io) => {
   io.on("connection", (socket) => {
     console.log("A user is connected");
+    socket.emit("new_user", "steve");
 
     socket.on("message", (message) => {
       console.log(`message from ${socket.id} : ${message}`);

@@ -9,6 +9,8 @@ dotenv.config({
 const express = require("express");
 const app = express();
 const socketUtils = require("./utils/socketUtils");
+const arduinoUtils = require("./utils/arduinoUtils");
+const { deflate } = require("zlib");
 
 const server = http.createServer(app);
 const io = socketUtils.sio(server);
@@ -35,4 +37,5 @@ server.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
 
-console.log("serissadfasdfasdf");
+arduinoUtils.setup();
+setInterval(arduinoUtils.loop, 10);
