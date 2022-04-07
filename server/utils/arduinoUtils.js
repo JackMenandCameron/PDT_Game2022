@@ -17,6 +17,7 @@ const clear = () => {
   introTime = 0;
   for (let i = 0; i < g.N_BUTTONS; i++) {
     lights[i] = false;
+    light_time[i] = 0;
     switches[i] = false;
   }
 };
@@ -133,9 +134,8 @@ exports.loop = (io) => {
     case g.game_start:
       console.log("Game Starting");
       setBool(lights, false);
-      setInterval(() => {
+      setTimeout(() => {
         g.stage = g.finished;
-        clearInterval();
       }, g.game_time);
       g.stage = g.game_happening;
       break;
