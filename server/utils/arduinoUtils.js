@@ -116,12 +116,12 @@ exports.loop = (io) => {
   switch (g.stage) {
     case g.waiting:
       lights[0] = true;
-      if (switches[0]) {
-        g.stage = g.intro;
-        h.setBool(lights, true);
-        introLights = g.N_BUTTONS;
-        introTime = Date.now();
-      }
+      // if (switches[0]) {
+      g.stage = g.intro;
+      h.setBool(lights, true);
+      introLights = g.N_BUTTONS;
+      introTime = Date.now();
+      // }
       if (switches[1] && switches[2]) {
         g.stage = g.test_start;
       }
