@@ -19,6 +19,7 @@ exports.connection = (io) => {
     });
 
     socket.on("new_user", (user) => {
+      console.log("new user");
       io.emit("new_user", user);
     });
 

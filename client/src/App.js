@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import React from "react";
 import "./App.css";
-import List from "./components/List";
 
 import { io } from "socket.io-client";
 
@@ -25,20 +25,17 @@ function App() {
   const handleClick = () => {
     socket.current.emit("new_user", "james");
   };
-
-  /**
-   * Adding the textbox for names
-   */
-  const textboxname = document.createElement("input");
-  // input.setAttribute("type", "text");
-
   return (
     <div className="App">
-      <p>Socket.io app</p>
-
-      {users.map((user) => {
-        return <List data={user} />;
+      <h1 className="text-3xl font-bold underline">Game Leaderboard</h1>
+      {users.map((user, index) => {
+        if (index % 2 === 0) {
+          return <p className="">{user} even</p>;
+        } else {
+          return <p>{user} odd</p>;
+        }
       })}
+
       <button type="button" onClick={handleClick}>
         Emit a time message
       </button>
