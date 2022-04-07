@@ -13,6 +13,7 @@ let score = -1;
 let light_time = [];
 
 const clear = () => {
+  score = -1;
   introLights = 0;
   introTime = 0;
   for (let i = 0; i < g.N_BUTTONS; i++) {
@@ -52,6 +53,7 @@ let random_light_on = () => {
     rand = random(0, g.N_BUTTONS);
   }
   lights[rand] = true;
+  console.log(rand, "on");
   light_time[rand] = Date.now();
 };
 
@@ -60,6 +62,7 @@ let check_push = () => {
     if (lights[i]) {
       if (switches[i]) {
         lights[i] = false;
+        console.log(i, "off");
         random_light_on();
         score++;
       }
@@ -86,6 +89,7 @@ let check_expire = () => {
   for (let i = 0; i < g.N_BUTTONS; i++) {
     if (lights[i] && Date.now() - light_time[i] > 1000) {
       lights[i] = false;
+      console.log(i, "off");
       score = score > 0 ? score - 1 : score;
       if (score != 4) {
         random_light_on();
@@ -97,6 +101,9 @@ let check_expire = () => {
 };
 
 exports.setup = () => {
+  setInterval(() => {
+    console.log(lights);
+  }, 1000);
   for (let i = 0; i < g.N_BUTTONS; i++) {
     lights[i] = false;
     switches[i] = false;
@@ -119,7 +126,7 @@ exports.loop = (io) => {
         g.stage = g.test_start;
       }
       break;
-    case intro:
+    case g.intro:
       if (Date.now() - introTime > g.intro_delay) {
         if (introLights == 0) {
           g.stage = g.game_start;
@@ -136,6 +143,7 @@ exports.loop = (io) => {
       setBool(lights, false);
       setTimeout(() => {
         g.stage = g.finished;
+        console.log("Game over");
       }, g.game_time);
       g.stage = g.game_happening;
       break;
@@ -143,13 +151,28 @@ exports.loop = (io) => {
       check_push();
       check_expire();
       break;
-    case finished:
-      console.log("Game over");
-      h.blink(lights, 4, 500);
-      io.emit("new_score", score);
-      io.emit("new_user", "tim");
-      g.stage = g.waiting;
-      clear();
+    case g.finished:
+      h.setBool(lights, false);
+      let id = setInterval(() => {
+        for (let i = 0; i < g.N_BUTTONS; i++) {
+          lights[i] = !lights[i];
+        }
+        console.log("FLIPPINGGGG");
+        console.log(lights);
+      }, 500);
+
+      setTimeout(() => {
+        io.emit("new_score", score);
+        io.emit("new_user", "tim");
+        g.stage = g.waiting;
+        clear();
+        clearInterval(id);
+        console.log("restarting");
+      }, 4000);
+
+      g.stage = g.blinking;
+      break;
+    case g.blinking:
       break;
     case g.test_start:
       if (switches[2] && switches[3]) {
@@ -157,7 +180,7 @@ exports.loop = (io) => {
         g.stage = g.waiting;
       }
       t.test_unit_all_presses(switches, lights);
-      stage = test_over;
+      g.stage = g.test_over;
       break;
     case g.test_over:
       break;

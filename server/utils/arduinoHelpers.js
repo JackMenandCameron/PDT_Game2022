@@ -1,7 +1,7 @@
 const g = require("./arduinoGlobal");
 
 let delay = (time) => {
-  return new Promise((resolve) => setTimeout(resolve, time));
+  setTimeout(() => {}, time);
 };
 
 let setBool = (arr, val) => {
@@ -20,10 +20,10 @@ let updateLights = (lights) => {
 let flash = (lights, time) => {
   setBool(lights, true);
   updateLights(lights);
-  await delay(time);
+  delay(time);
   setBool(lights, false);
   updateLights(lights);
-  await delay(time);
+  delay(time);
 };
 
 module.exports = {

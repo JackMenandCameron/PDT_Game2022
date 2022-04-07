@@ -4,6 +4,8 @@ let outs = [4, 17, 27, 22, 5, 6];
 let ins = [16, 18, 23, 24, 25, 12];
 let LEDS = outs.map((out) => new Gpio(out, "out"));
 let SWITCHES = ins.map((pin) => new Gpio(pin, "in"));
+// let LEDS = [];
+// let SWITCHES = [];
 
 (N_BUTTONS = 6),
   (ins = [3, 5, 7, 9]),
@@ -14,6 +16,7 @@ let SWITCHES = ins.map((pin) => new Gpio(pin, "in"));
   (game_start = 2),
   (game_happening = 3),
   (finished = 4),
+  (blinking = 7),
   (test_start = 5),
   (test_over = 6),
   (module.exports = {
@@ -23,7 +26,7 @@ let SWITCHES = ins.map((pin) => new Gpio(pin, "in"));
     SWITCHES,
     // ins: [3, 5, 7, 9],
     intro_delay: 300,
-    game_time: 15000,
+    game_time: 5000,
 
     HIGH,
     LOW,
@@ -33,6 +36,7 @@ let SWITCHES = ins.map((pin) => new Gpio(pin, "in"));
     game_start,
     game_happening,
     finished,
+    blinking,
     test_start,
     test_over,
     stage: waiting,
