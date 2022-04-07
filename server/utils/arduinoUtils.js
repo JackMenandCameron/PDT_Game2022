@@ -1,13 +1,10 @@
-// Stage stage = waiting;
-// const int gameLength = 15;
 const g = require("./arduinoGlobal");
-const { setBool } = require("./arduinoHelpers");
+const { setBool, delay } = require("./arduinoHelpers");
 const h = require("./arduinoHelpers");
 const t = require("./arduinoTests");
-const d = new Date();
 
 let introLights;
-// Timer<> timer;
+let introTime;
 let lights = [];
 let switches = [];
 let gameStart = 0;
@@ -17,7 +14,7 @@ let light_time = [];
 
 const clear = () => {
   introLights = 0;
-  //   timer = timer_create_default();
+  introTime = 0;
   for (let i = 0; i < g.N_BUTTONS; i++) {
     lights[i] = false;
     switches[i] = false;
@@ -54,7 +51,7 @@ let random_light_on = () => {
     rand = random(0, g.N_BUTTONS);
   }
   lights[rand] = true;
-  light_time[rand] = d.getMilliseconds();
+  light_time[rand] = Date.now();
 };
 
 let check_push = () => {
@@ -78,6 +75,7 @@ let check_push = () => {
         random_light_on();
         lights_on++;
       }
+      break;
     default:
       break;
   }
@@ -85,7 +83,7 @@ let check_push = () => {
 
 let check_expire = () => {
   for (let i = 0; i < g.N_BUTTONS; i++) {
-    if (lights[i] && d.getMilliseconds() - light_time[i] > 1000) {
+    if (lights[i] && Date.now() - light_time[i] > 1000) {
       lights[i] = false;
       score = score > 0 ? score - 1 : score;
       if (score != 4) {
@@ -102,35 +100,43 @@ exports.setup = () => {
     lights[i] = false;
     switches[i] = false;
     light_time[i] = 0;
-    // pinMode(outs[i], OUTPUT);
-    // pinMode(ins[i], INPUT);
   }
   clear();
 };
 
-exports.loop = () => {
-  // timer.tick();
+exports.loop = (io) => {
   switch (g.stage) {
     case g.waiting:
       lights[0] = true;
       if (switches[0]) {
         g.stage = g.intro;
         h.setBool(lights, true);
-        h.delay(200);
-        // sweepLights(&timer, &stage, lights, 100UL);
+        introLights = g.N_BUTTONS;
+        introTime = Date.now();
       }
       if (switches[1] && switches[2]) {
         g.stage = g.test_start;
       }
       break;
     case intro:
-      g.stage = g.game_start;
+      if (Date.now() - introTime > g.intro_delay) {
+        if (introLights == 0) {
+          g.stage = g.game_start;
+        } else {
+          introLights--;
+          console.log("light", introLights, "off");
+          lights[introLights] = false;
+          introTime = Date.now();
+        }
+      }
       break;
     case g.game_start:
+      console.log("Game Starting");
       setBool(lights, false);
       setInterval(() => {
         g.stage = g.finished;
-      }, 5000);
+        clearInterval();
+      }, g.game_time);
       g.stage = g.game_happening;
       break;
     case g.game_happening:
@@ -138,9 +144,11 @@ exports.loop = () => {
       check_expire();
       break;
     case finished:
+      console.log("Game over");
       h.blink(lights, 4, 500);
+      io.emit("new_score", score);
+      io.emit("new_user", "tim");
       g.stage = g.waiting;
-      // Serial.println(score);
       clear();
       break;
     case g.test_start:
@@ -149,7 +157,7 @@ exports.loop = () => {
         g.stage = g.waiting;
       }
       t.test_unit_all_presses(switches, lights);
-      // stage = test_over;
+      stage = test_over;
       break;
     case g.test_over:
       break;

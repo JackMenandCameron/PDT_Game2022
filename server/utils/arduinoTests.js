@@ -18,6 +18,7 @@ module.exports = {
     console.log(blinkLED);
     setInterval(() => {
       blinkLED(led);
+      clearInterval();
     }, 250);
   },
 

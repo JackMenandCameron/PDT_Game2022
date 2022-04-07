@@ -4,14 +4,33 @@ let delay = (time) => {
   setTimeout(() => {}, time);
 };
 
+let setBool = (arr, val) => {
+  for (let i = 0; i < g.N_BUTTONS; i++) {
+    arr[i] = val;
+  }
+};
+
+let updateLights = (lights) => {
+  for (let i = 0; i < g.N_BUTTONS; i++) {
+    let to_write = lights[i] ? g.HIGH : g.LOW;
+    // g.LEDS[i].writeSync(to_write);
+  }
+};
+
+let flash = (lights, time) => {
+  setBool(lights, true);
+  updateLights(lights);
+  delay(time);
+  setBool(lights, false);
+  updateLights(lights);
+  delay(time);
+};
+
 module.exports = {
   delay,
-
-  setBool: (arr, val) => {
-    for (let i = 0; i < g.N_BUTTONS; i++) {
-      arr[i] = val;
-    }
-  },
+  setBool,
+  updateLights,
+  flash,
 
   in: (arr, val) => {
     for (let i = 0; i < g.N_BUTTONS; i++) {
@@ -20,31 +39,15 @@ module.exports = {
     return false;
   },
 
-  updateLights: (lights) => {
-    for (let i = 0; i < g.N_BUTTONS; i++) {
-      let to_write = lights[i] ? g.HIGH : g.LOW;
-      g.LEDS[i].writeSync(to_write);
-    }
-  },
-
   updateSwitches: (switches) => {
     for (let i = 0; i < g.N_BUTTONS; i++) {
-      switches[i] = g.SWITCHES[i].readSync() == 1;
+      // switches[i] = g.SWITCHES[i].readSync() == 1;
     }
-  },
-
-  flash: (lights, time) => {
-    this.setBool(lights, true);
-    this.updateLights(lights);
-    // delay(time);
-    this.setBool(lights, false);
-    this.updateLights(lights);
-    // delay(time);
   },
 
   blink: (lights, n, time) => {
     for (let i = 0; i < n; i++) {
-      this.flash(lights, time);
+      flash(lights, time);
     }
   },
 

@@ -38,4 +38,4 @@ server.listen(port, () => {
 });
 
 arduinoUtils.setup();
-setInterval(arduinoUtils.loop, 10);
+setInterval(() => arduinoUtils.loop(io), 10);
