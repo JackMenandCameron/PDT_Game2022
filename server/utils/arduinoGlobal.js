@@ -23,7 +23,7 @@ let SWITCHES = ins.map((pin) => new Gpio(pin, "in"));
     SWITCHES,
     // ins: [3, 5, 7, 9],
     intro_delay: 300,
-    game_time: 1500,
+    game_time: 15000,
 
     HIGH,
     LOW,
