@@ -13,7 +13,7 @@ let setBool = (arr, val) => {
 let updateLights = (lights) => {
   for (let i = 0; i < g.N_BUTTONS; i++) {
     let to_write = lights[i] ? g.HIGH : g.LOW;
-    // g.LEDS[i].writeSync(to_write);
+    g.LEDS[i].writeSync(to_write);
   }
 };
 
@@ -41,7 +41,7 @@ module.exports = {
 
   updateSwitches: (switches) => {
     for (let i = 0; i < g.N_BUTTONS; i++) {
-      // switches[i] = g.SWITCHES[i].readSync() == 1;
+      switches[i] = g.SWITCHES[i].readSync() == 1;
     }
   },
 
