@@ -1,6 +1,12 @@
 const g = require("./arduinoGlobal");
 
+let delay = (time) => {
+  setTimeout(() => {}, time);
+};
+
 module.exports = {
+  delay,
+
   setBool: (arr, val) => {
     for (let i = 0; i < g.N_BUTTONS; i++) {
       arr[i] = val;
@@ -17,13 +23,13 @@ module.exports = {
   updateLights: (lights) => {
     for (let i = 0; i < g.N_BUTTONS; i++) {
       let to_write = lights[i] ? g.HIGH : g.LOW;
-      // digitalWrite(outs[i], to_write);
+      g.LEDS[i].writeSync(to_write);
     }
   },
 
   updateSwitches: (switches) => {
     for (let i = 0; i < g.N_BUTTONS; i++) {
-      //   switches[i] = digitalRead(ins[i]) == 1;
+      switches[i] = g.SWITCHES[i].readSync() == 1;
     }
   },
 

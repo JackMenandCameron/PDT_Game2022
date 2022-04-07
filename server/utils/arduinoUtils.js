@@ -1,13 +1,19 @@
 // Stage stage = waiting;
 // const int gameLength = 15;
 const g = require("./arduinoGlobal");
+const { setBool } = require("./arduinoHelpers");
 const h = require("./arduinoHelpers");
+const t = require("./arduinoTests");
+const d = new Date();
 
-let score, introLights;
+let introLights;
 // Timer<> timer;
 let lights = [];
 let switches = [];
-let stage = g.waiting;
+let gameStart = 0;
+let lights_on = 0;
+let score = -1;
+let light_time = [];
 
 const clear = () => {
   introLights = 0;
@@ -35,25 +41,67 @@ function random(min, max) {
   return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 }
 
-const game = () => {
-  let on = false;
+let random_light_on = () => {
+  let all_on = true;
+  for (let i = 0; i < g.N_BUTTONS; i++) {
+    all_on &= lights[i];
+  }
+  if (all_on) {
+    return;
+  }
+  let rand = random(0, g.N_BUTTONS);
+  while (lights[rand]) {
+    rand = random(0, g.N_BUTTONS);
+  }
+  lights[rand] = true;
+  light_time[rand] = d.getMilliseconds();
+};
+
+let check_push = () => {
   for (let i = 0; i < g.N_BUTTONS; i++) {
     if (lights[i]) {
       if (switches[i]) {
         lights[i] = false;
-      } else {
-        on = true;
+        random_light_on();
+        score++;
       }
     }
   }
-  if (!on) {
-    let randNumber = random(0, g.N_BUTTONS);
-    lights[randNumber] = true;
+  switch (score) {
+    case -1:
+      random_light_on();
+      lights_on++;
+      score++;
+      break;
+    case 5:
+      if (lights_on == 1) {
+        random_light_on();
+        lights_on++;
+      }
+    default:
+      break;
+  }
+};
+
+let check_expire = () => {
+  for (let i = 0; i < g.N_BUTTONS; i++) {
+    if (lights[i] && d.getMilliseconds() - light_time[i] > 1000) {
+      lights[i] = false;
+      score = score > 0 ? score - 1 : score;
+      if (score != 4) {
+        random_light_on();
+      } else {
+        lights_on--;
+      }
+    }
   }
 };
 
 exports.setup = () => {
   for (let i = 0; i < g.N_BUTTONS; i++) {
+    lights[i] = false;
+    switches[i] = false;
+    light_time[i] = 0;
     // pinMode(outs[i], OUTPUT);
     // pinMode(ins[i], INPUT);
   }
@@ -62,31 +110,45 @@ exports.setup = () => {
 
 exports.loop = () => {
   // timer.tick();
-
-  switch (stage) {
+  switch (g.stage) {
     case g.waiting:
       lights[0] = true;
       if (switches[0]) {
-        stage = g.intro;
+        g.stage = g.intro;
         h.setBool(lights, true);
-        // sweepLights(&timer, &stage, lights, 1000UL);
+        h.delay(200);
+        // sweepLights(&timer, &stage, lights, 100UL);
+      }
+      if (switches[1] && switches[2]) {
+        g.stage = g.test_start;
       }
       break;
-    case g.intro:
+    case intro:
+      g.stage = g.game_start;
       break;
     case g.game_start:
-      // timer.in(15000, endgame, (void *)&stage);
-      stage = g.game_happening;
+      setBool(lights, false);
+      setInterval(() => {
+        g.stage = g.finished;
+      }, 5000);
+      g.stage = g.game_happening;
       break;
     case g.game_happening:
-      game();
+      check_push();
+      check_expire();
       break;
-    case g.finished:
-      blink(lights, 4, 500);
-      stage = g.waiting;
+    case finished:
+      h.blink(lights, 4, 500);
+      g.stage = g.waiting;
+      // Serial.println(score);
+      clear();
       break;
     case g.test_start:
-      test_unit_all_presses(switches, lights);
+      if (switches[2] && switches[3]) {
+        clear();
+        g.stage = g.waiting;
+      }
+      t.test_unit_all_presses(switches, lights);
       // stage = test_over;
       break;
     case g.test_over:
